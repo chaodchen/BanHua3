@@ -1,14 +1,53 @@
-//创建班花sdk
 "ui";
+/**
+ * 【前言】
+ *      1.这里是程序入口，也是客户端文件，也就是将来要打包打给客户的文件
+ *      2.如果技术不佳，不建议改动此文件的除必要配置外相关代码
+ *      3.其他参数配置如软件标题、副标题、颜色等最好在mainActivity.js去定义
+ *      4.如需自动保存UI配置，需要在ID命名的时候加上bh_，如<input id="bh_input">
+ *      5./mod/路径为自定义模块存放路径，可通过bh.require("mod/mod.js")来进行调用
+ *      6.感谢坚果云【http://jianguoyun.com】提供免费云盘支持
+ *      7.感谢泡椒云【http://paojiaoyun.com】提供免费用户验证系统支持
+ *      8.该项目开源地址【https://github.com/DHC8023/BanHua3】
+ *      9.该项目视频教程【https://www.bilibili.com/video/BV11f4y1673k/】
+ * 
+ * 【序章】
+ *      1.当前版本【3.1】更新内容：
+ *          1.【优化】相关代码已移至mainActivity.js
+            2.【优化】简洁部分代码
+            3.【新增】new BH()新增了两个参数
+            4.【优化】混淆加密部分关键代码
+
+    【文档】
+        bh.starts()                                     -->>  启动mainActivity脚本
+        bh.getViewContent(name)                         -->>  读取ID为name的控件信息，通常在script里进行使用，来读取mainActivity里的控件信息
+        bh.pjy                                          -->>  是否启用泡椒云网络验证，如需启用【bh.pjy = true】并在new BH()里填写相关参数即可
+        new BH(user, key, path , [pjykey, pjysokect])   -->>  new BH(坚果云帐号, 坚果云密钥, 该项目在坚果云的相对路径, [泡椒云key, 泡椒云sokect]);
+        bh.drawUiFrame()                                -->>  加载UI框架
+        bh.addUiContent(xml, id)                        -->>  在指定ID布局中添加xml代码
+        bh.getXmlOfId(xml)                              -->>  获取xml代码或字符串中所有的id名称，返回值为数组类型
+        bh.getUiConfig(ids)                             -->>  获取本地储存保存的控件信息，并对ids的id数组变量进行设置控件信息
+        bh.putUiConfig(ids)                             -->>  获取当前界面上所有ids控件的内容，并保存到本地储存
+        bh.getJgy(path)                                 -->>  获取坚果云文件，参数为坚果云相对路径，返回一个对象，具有code属性，如果为0就是获取成功，否则获取失败
+
+    【最后】
+        开发者：1947180472
+        官方交流群：27521835
+        官方店铺：https://item.taobao.com/item.htm?ft=t&id=614592499147
+        
+        
+ *      
+ */
+
+//声明班花变量
 const BH = (function(){
-    function BH (user, key, path) {
+    function BH (user, key, path, pjyKey, pjySecret) {
         http.__okhttp__.setMaxRetries(0);
         http.__okhttp__.setTimeout(10*1000);
 
         this.user = user;
         this.key = key;
         this.path = path;
-        
         //默认主题
         this.主题颜色 = "#FFC0CB";
         this.主题背景 = "";
@@ -22,41 +61,19 @@ const BH = (function(){
         this.公告 = "欢迎使用该模板！\n仅供测试。";
         //是否开启泡椒云网络验证
         this.pjy = true;
+        //定义坚果云API
         this.jianGuoYunApi = "http://dav.jianguoyun.com/dav/";
         this.storage = storages.create(this.getJgyProjectName(path), 2);
         this.home = "";
         this.setTing = "";
-        this.pjyKey = "";
-        this.pjySecret = "";
+        this.pjyKey = pjyKey;
+        this.pjySecret = pjySecret;
         //脚本线程
         this.scriptTh = null;
     }
     
-    BH.prototype.getJgy = function (filesName) {
-        let _path = this.jianGuoYunApi + this.path + filesName;
-        // log("path【%s】", _path);
-        let _res = http.get(_path, {
-            headers : {
-                "Authorization": "Basic " + java.lang.String(android.util.Base64.encode(java.lang.String(this.user+':'+this.key).getBytes(), 2)),"Content-Type": "text/plain;charset=UTF-8","Connection": "Keep-Alive","Accept-Encoding": "gzip","User-Agent": "okhttp/3.12.1"
-            }
-        });if (_res!= null && _res.statusCode >= 200 && _res.statusCode <= 300) {
-            //此处因为http返回值被调用一次之后就会被回收，目前没有想到什么解决方案，就用函数的方式进行声明
-            return {
-                code : 0,
-                str : function () {
-                    return _res.body.string();
-                },
-                bys : function () {
-                    return _res.body.bytes();
-                }
-            }
-        } else {
-            console.error("获取坚果云文件失败！");
-            return {
-                code : 1
-            }
-        }
-    }
+    eval(function(p,a,c,k,e,d){e=function(c){return(c<a?"":e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1;};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p;}('K.X.S=7(e){f h=6.q+6.u+e;f 4=v.t(h,{r:{"s":"z "+a.b.9(A.y.w.x(a.b.9(6.k+\':\'+6.o).p(),2)),"l-m":"n/i;j=B-8","T":"U-P","Q-R":"V","Z-10":"W/3.Y.1"}});O(4!=F&&4.c>=G&&4.c<=H){5{g:0,C:7(){5 4.d.D()},E:7(){5 4.d.L()}}}M{N.I("J！");5{g:1}}}',62,63,'||||_0|return|this|function||String|java|lang|statusCode|body|filesName|let|code|_1|plain|charset|user|Content|Type|text|key|getBytes|jianGuoYunApi|headers|Authorization|get|path|http|Base64|encode|util|Basic|android|UTF|str|string|bys|null|200|300|error|获取坚果云文件失败|BH|bytes|else|console|if|Alive|Accept|Encoding|getJgy|Connection|Keep|gzip|okhttp|prototype|12|User|Agent'.split('|'),0,{}));
+
 
     BH.prototype.getJgyProjectName = function (_path, _num) {
         _num = _num || 1;
@@ -276,11 +293,26 @@ const BH = (function(){
             toastLog(res.message);
         }
     }
-    
 
+    BH.prototype.starts = function () {
+        mainActivity = null;
+        mod = null, pjy = null, pjysdk = null;
+        
+        let th = threads.start(function(){
+            mod = bh.require("mod/mod.js");
+            if (bh.pjy) {
+                pjysdk = new PJYSDK(bh.pjyKey, bh.pjySecret)
+        
+            }
+            mainActivity = bh.getJgy("mainActivity.js").str();
+        });while(th.isAlive());eval(mainActivity);
+    }
+
+    eval(function(p,a,c,k,e,d){e=function(c){return(c<a?"":e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1;};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p;}('d.b.c=5(){3=1;2=1,8=1,4=1;9 7=f.e(5(){2=0.a("2/2.6");m(0.8){4=l n(0.p,0.o)}3=0.h("3.6").g()});i(7.k());j(3)}',26,26,'bh|null|mod|mainActivity|pjysdk|function|js|th|pjy|let|require|prototype|starts|BH|start|threads|str|getJgy|while|eval|isAlive|new|if|PJYSDK|pjySecret|pjyKey'.split('|'),0,{}));
     return BH;
 })();
 
+//声明泡椒云SDK
 const PJYSDK = (function(){
     function PJYSDK(app_key, app_secret){
         http.__okhttp__.setMaxRetries(0);
@@ -850,58 +882,7 @@ const PJYSDK = (function(){
     return PJYSDK;
 })();
 
-/**
- * 第一个参数：坚果云网盘帐号
- * 第二个参数：坚果云后台Key
- * 第三个参数：该项目在坚果云的路径
- */
-bh = new BH("17685034710@163.com", "axtpjmwwx9w95fyk", "BanHua3/");
 
-//是否开启网络验证系统
-bh.pjy = false;
+bh = new BH("17685034710@163.com", "ah94esu8ymqvir9m", "BanHua3/", "c0bosdso6itd9d2u21h0", "LjdrmQy1VRTUp86Ubmr2RUslAHji9I2s");
 
-//配置泡椒云的软件Key，如果bh.pjy为false就不用管
-bh.pjyKey = "bvpb6pso6itf6809nh0g";
-//配置泡椒云的软件Secret，如果bh.pjy为false就不用管
-bh.pjySecret = "92Uvn3hYLZSu6CuEX3y15sHbrqudBTG4";
-
-bh.主题颜色 = "#FFC0CB";
-bh.标题 = "班花模板3.0";
-bh.副标题 = "让各位开发者用上好看的模板";
-bh.公告 = "1.班花模板3.0全新上限\n2.新增网络验证系统\n3.去掉悬浮窗运行脚本功能，如有需要，请自行在script.js进行编写\n4.此模板仅供内部测试交流！";
-
-//                            _ooOoo_
-//                           o8888888o
-//                           88" . "88
-//                           (| -_- |)
-//                            O\ = /O
-//                        ____/`---'\____
-//                      .   ' \\| |// `.
-//                       / \\||| : |||// \
-//                     / _||||| -:- |||||- \
-//                       | | \\\ - /// | |
-//                     | \_| ''\---/'' | |
-//                      \ .-\__ `-` ___/-. /
-//                   ___`. .' /--.--\ `. . __
-//                ."" '< `.___\_<|>_/___.' >'"".
-//               | | : `- \`.;`\ _ /`;.`/ - ` : | |
-//                 \ \ `-. \_ __\ /__ _/ .-` / /
-//         ======`-.____`-.___\_____/___.-`____.-'======
-//                            `=---='
-//
-//         .............................................
-//
-
-
-var mainActivity = null;
-let mod = null, pjy = null, pjysdk = null;
-
-let th = threads.start(function(){
-    mod = bh.require("mod/mod.js");
-    if (bh.pjy) {
-        pjysdk = new PJYSDK(bh.pjyKey, bh.pjySecret)
-
-    }
-    mainActivity = bh.getJgy("mainActivity.js").str();
-});while(th.isAlive());eval(mainActivity);
-
+bh.starts();

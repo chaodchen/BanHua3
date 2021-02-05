@@ -2,9 +2,19 @@ importClass(android.content.Intent);
 importClass(android.net.Uri);
 importClass(android.provider.Settings);
 
+
+//这里的项目自己进行配置
+bh.主题颜色 = "#FFC0CB";
+bh.标题 = "这个是我的标题";
+bh.副标题 = "让各位开发者用上好看的模板";
+bh.公告 = "1.班花模板3.0全新上限\n2.新增网络验证系统\n3.去掉悬浮窗运行脚本功能，如有需要，请自行在script.js进行编写\n4.此模板仅供内部测试交流！";
+bh.pjy = true;
+
+
 //加载UI框架
 bh.drawUiFrame();
 
+//添加公告卡片
 bh.addUiContent(
     <frame>
         <vertical>
@@ -17,6 +27,20 @@ bh.addUiContent(
     </frame>, "home"
 );
 
+//添加设置权限卡片
+bh.addUiContent(
+    <frame>
+        <vertical>
+            <text gravity='center' text='权限服务' w='*' h='auto' textSize='18sp' textColor='#ffffff' padding='10dp' bg='{{bh.主题颜色}}'></text>
+            <Switch id='autoService' text='*无障碍服务' padding='8dp' textSize='15sp' checked='{{auto.service != null}}'></Switch>
+            <Switch id='windowService' text='悬浮窗服务' padding='8dp' textSize='15sp'></Switch>
+            <Switch id='rootService' text='Root服务' padding='8dp' textSize='15sp' checked='{{bh.isSuEnable()}}'></Switch>
+            <Switch id='deBugService' text='调试服务' padding='8dp' textSize='15sp'></Switch>
+        </vertical>
+    </frame>, "setTing"
+);
+
+//如果泡椒云开启，就添加会员卡片
 if (bh.pjy) {
     pjyUser = null;
     bh.addUiContent(
@@ -40,7 +64,7 @@ if (bh.pjy) {
                     </horizontal>
                 </vertical>
             </vertical>
-        </frame>, "home"
+        </frame>, "setTing"
     );
 
     //创建按键的点击事件
@@ -84,18 +108,7 @@ if (bh.pjy) {
     });
 }
 
-bh.addUiContent(
-    <frame>
-        <vertical>
-            <text gravity='center' text='权限服务' w='*' h='auto' textSize='18sp' textColor='#ffffff' padding='10dp' bg='{{bh.主题颜色}}'></text>
-            <Switch id='autoService' text='*无障碍服务' padding='8dp' textSize='15sp' checked='{{auto.service != null}}'></Switch>
-            <Switch id='windowService' text='悬浮窗服务' padding='8dp' textSize='15sp'></Switch>
-            <Switch id='rootService' text='Root服务' padding='8dp' textSize='15sp' checked='{{bh.isSuEnable()}}'></Switch>
-            <Switch id='deBugService' text='调试服务' padding='8dp' textSize='15sp'></Switch>
-        </vertical>
-    </frame>, "setTing"
-);
-
+//添加手机设置卡片
 bh.addUiContent(
     <frame>
         <vertical>
@@ -105,17 +118,22 @@ bh.addUiContent(
     </frame>, "setTing"
 );
 
+//最后再添加脚本内容卡片
 bh.addUiContent(
     <vertical>
         <text gravity='center' text='脚本功能' w='*' h='auto' textSize='18sp' textColor='#ffffff' padding='10dp' bg='{{bh.主题颜色}}'></text>
         <vertical padding='8dp'>
             <horizontal>
                 <text text='账号：'></text>
-                <input w='*' id='bh_user' hint='请输入账号'></input>
+                <input w='*' id='bh_user' hint='账号'></input>
             </horizontal>
             <horizontal>
                 <text text='密码：'></text>
-                <input w='*' id='bh_user' hint='请输入密码' inputType='textPassword'></input>
+                <input w='*' id='bh_user' hint='密码' inputType='textPassword'></input>
+            </horizontal>
+            <horizontal>
+                <text text='年龄：'></text>
+                <input w='*' id='bh_old' hint='输入年龄' inputType='number'></input>
             </horizontal>
             <horizontal>
                 <text text='性别：'></text>
@@ -138,8 +156,9 @@ bh.addUiContent(
     </vertical>, "home"
 );
 
-//开始设置UI内容
+//开始读取并设置UI内容
 bh.getUiConfig(bh.getXmlOfId(bh.home));
+bh.getUiConfig(bh.getXmlOfId(bh.setTing));
 
 //无障碍服务单击事件
 ui.autoService.on('click', () => {
@@ -182,14 +201,17 @@ ui.deBugService.on('click', () => {
 
 //回到本界面时，触发resume事件
 ui.emitter.on('resume', ()=> {
+    toastLog("欢迎回来！");
     auto.service == null ? ui.autoService.setChecked(false) : ui.autoService.setChecked(true);
 });
 
-//监听fab的点击事件
+//监听开始事件
 ui.fab.on('click', ()=> {
     
     //保存控件信息
     bh.putUiConfig(bh.getXmlOfId(bh.home));
+    bh.putUiConfig(bh.getXmlOfId(bh.setTing));
+
     if (bh.scriptTh == null || !bh.scriptTh.isAlive()) {
         //开始判断需要会员吗
         if (bh.pjy) {
@@ -215,6 +237,7 @@ ui.fab.on('click', ()=> {
     }
 });
 
+//监听退出事件
 ui.fab2.on('click', ()=> {
     toastLog("退出软件");
     ui.finish();
