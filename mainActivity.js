@@ -1,6 +1,7 @@
 importClass(android.content.Intent);
 importClass(android.net.Uri);
 importClass(android.provider.Settings);
+importClass(android.view.View);
 
 
 //这里的项目自己进行配置
@@ -8,8 +9,8 @@ bh.主题颜色 = "#FFC0CB";
 bh.标题 = "这个是我的标题";
 bh.副标题 = "让各位开发者用上好看的模板";
 bh.公告 = "1.班花模板3.0全新上限\n2.新增网络验证系统\n3.去掉悬浮窗运行脚本功能，如有需要，请自行在script.js进行编写\n4.此模板仅供内部测试交流！";
-bh.pjy = true;
-
+bh.pjy = false;
+bh.悬浮窗 = true;
 
 //加载UI框架
 bh.drawUiFrame();
@@ -217,20 +218,14 @@ ui.fab.on('click', ()=> {
         if (bh.pjy) {
             if (pjyUser.code == 0) {
                 log("尊敬的会员用户，欢迎您！");
-                bh.scriptTh = threads.start(function() {
-                    let script = bh.getJgy("script.js").str();
-                    eval(script);
-                });
+                bh.runScript();
             } else {
                 // log("失败~请使用卡密激活此软件！");
                 toastLog(pjyUser.message);
             }
         } else {
             //不需要网络验证
-            bh.scriptTh = threads.start(function() {
-                let script = bh.getJgy("script.js").str();
-                eval(script);
-            });
+            bh.runScript();
         }
     } else {
         toastLog("哎呀，疼~");

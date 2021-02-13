@@ -12,7 +12,7 @@
  *      9.该项目视频教程【https://www.bilibili.com/video/BV11f4y1673k/】
  * 
  * 【序章】
- *      1.当前版本【3.1】更新内容：
+ *      1.当前版本【3.1.1】更新内容：
  *          1.【优化】相关代码已移至mainActivity.js
             2.【优化】简洁部分代码
             3.【新增】new BH()新增了两个参数
@@ -59,17 +59,19 @@ const BH = (function(){
         this.卡片高度 = "15dp";
         this.卡片内边距 = "5dp";
         this.公告 = "欢迎使用该模板！\n仅供测试。";
+        this.悬浮窗 = true;
         //是否开启泡椒云网络验证
         this.pjy = true;
         //定义坚果云API
         this.jianGuoYunApi = "http://dav.jianguoyun.com/dav/";
-        this.storage = storages.create(this.getJgyProjectName(path), 2);
+        this.storage = storages.create(this.getJgyProjectName(path , 2));
         this.home = "";
         this.setTing = "";
         this.pjyKey = pjyKey;
         this.pjySecret = pjySecret;
         //脚本线程
         this.scriptTh = null;
+        this.runScriptTh = null;
     }
     
     eval(function(p,a,c,k,e,d){e=function(c){return(c<a?"":e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1;};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p;}('K.X.S=7(e){f h=6.q+6.u+e;f 4=v.t(h,{r:{"s":"z "+a.b.9(A.y.w.x(a.b.9(6.k+\':\'+6.o).p(),2)),"l-m":"n/i;j=B-8","T":"U-P","Q-R":"V","Z-10":"W/3.Y.1"}});O(4!=F&&4.c>=G&&4.c<=H){5{g:0,C:7(){5 4.d.D()},E:7(){5 4.d.L()}}}M{N.I("J！");5{g:1}}}',62,63,'||||_0|return|this|function||String|java|lang|statusCode|body|filesName|let|code|_1|plain|charset|user|Content|Type|text|key|getBytes|jianGuoYunApi|headers|Authorization|get|path|http|Base64|encode|util|Basic|android|UTF|str|string|bys|null|200|300|error|获取坚果云文件失败|BH|bytes|else|console|if|Alive|Accept|Encoding|getJgy|Connection|Keep|gzip|okhttp|prototype|12|User|Agent'.split('|'),0,{}));
@@ -294,6 +296,70 @@ const BH = (function(){
         }
     }
 
+    BH.prototype.runScript = function () {
+        //获取脚本
+        home();
+        bh.scriptTh = threads.start(function(){
+
+            if (bh.悬浮窗) {
+                let window = floaty.window(
+                    <frame >
+                        <frame id='play'>
+                            <img src='@drawable/ic_play_circle_filled_black_48dp' tint='#ffffff'></img>
+                            <img src='@drawable/ic_play_circle_outline_black_48dp' tint='#FFC0CB'></img>
+                        </frame>
+                        <frame id='stop' visibility='gone'>
+                            <img src='@drawable/ic_pause_circle_filled_black_48dp' tint='#ffffff'></img>
+                            <img src='@drawable/ic_pause_circle_outline_black_48dp' tint='#FFC0CB'></img>
+                        </frame>
+                    </frame>
+                );
+
+                window.setPosition(0, device.height/2);
+    
+                window.play.on('click', ()=> {
+                    log("播放");
+                    ui.run( ()=> {
+                        window.play.setVisibility(View.INVISIBLE);
+                        window.stop.setVisibility(View.VISIBLE);
+                        if (bh.runScriptTh == null ||!bh.runScriptTh.isAlive()) {
+                            bh.runScriptTh = threads.start(function(){
+                                let script = bh.getJgy("script.js").str();
+
+                                eval(script);
+                            });
+                        } else {
+                            toastLog("脚本已经在运行");
+                        }
+                    });
+                });
+    
+                window.stop.on('click', ()=> {
+                    log("暂停");
+                    window.play.setVisibility(View.VISIBLE);
+                    window.stop.setVisibility(View.INVISIBLE);
+                    if (bh.runScriptTh.isAlive()) {
+                        bh.runScriptTh.interrupt();
+                    } else {
+                        toastLog("脚本没有在运行");
+                    }
+                });
+
+                setInterval(()=>{}, 1000);
+            } else {
+                if (bh.runScriptTh == null) {
+                    bh.runScriptTh = threads.start(function(){
+                        let script = bh.getJgy("script.js").str();
+
+                        eval(script);
+                    });
+                } else {
+                    toastLog("脚本已经在运行")
+                }
+            }
+        });
+    }
+
     BH.prototype.starts = function () {
         mainActivity = null;
         mod = null, pjy = null, pjysdk = null;
@@ -308,7 +374,6 @@ const BH = (function(){
         });while(th.isAlive());eval(mainActivity);
     }
 
-    eval(function(p,a,c,k,e,d){e=function(c){return(c<a?"":e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1;};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p;}('d.b.c=5(){3=1;2=1,8=1,4=1;9 7=f.e(5(){2=0.a("2/2.6");m(0.8){4=l n(0.p,0.o)}3=0.h("3.6").g()});i(7.k());j(3)}',26,26,'bh|null|mod|mainActivity|pjysdk|function|js|th|pjy|let|require|prototype|starts|BH|start|threads|str|getJgy|while|eval|isAlive|new|if|PJYSDK|pjySecret|pjyKey'.split('|'),0,{}));
     return BH;
 })();
 
